@@ -1,0 +1,35 @@
+version: '2'
+services:
+  api:
+    build:
+      context: ./diditship_api
+      args:
+        ENV: ${ENV} # from .env file
+    volumes:
+      - ./diditship_api:/usr/src/app/
+      - /usr/src/app/node_modules
+    ports:
+      - "9001:8000"
+    env_file:
+      - "./.env"
+    links:
+      - bb_qc_db
+  bb_qc_db:
+    image: mysql:5.7
+    volumes:
+      - "./dev_sql:/docker-entrypoint-initdb.d"
+    restart: always
+    ports:
+      - 3307:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: bb_quality_control
+      MYSQL_USER: bb_dev
+      MYSQL_PASSWORD: bb_dev
+  client:
+    build: diditship_client
+    volumes:
+      - ./diditship_client/client:/usr/src/app/
+      - /usr/src/app/node_modules
+    ports:
+      - "9000:3000"
